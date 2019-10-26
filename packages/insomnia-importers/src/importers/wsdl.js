@@ -1,5 +1,6 @@
 'use strict';
 const postman = require('./postman');
+const swagger2 = require('./swagger2');
 const apiWSDL = require('apiconnect-wsdl');
 
 module.exports.id = 'wsdl';
@@ -9,12 +10,14 @@ module.exports.description = 'Importer for WSDL files';
 module.exports.convert = async function(data) {
   try {
     if (data.indexOf('wsdl:definition') !== -1) {
-      let postmanData = await convertWsdlToPostman(
+      let perServiceSwagger = await convertWsdlToPostman(
         '<?xml version="1.0" encoding="UTF-8" ?>' + data,
       );
-      postmanData.info.schema += 'collection.json';
-      let postmanjson = JSON.stringify(postmanData);
-      let converted = postman.convert(postmanjson);
+      // postmanData.info.schema += 'collection.json';
+      let postmanjson = JSON.stringify(perServiceSwagger);
+      console.log(postmanjson);
+      debugger;
+      let converted = swagger2.convert(postmanjson);
       return converted;
     }
   } catch (e) {
@@ -102,7 +105,7 @@ async function convertWsdlToPostman(input) {
     const wsdlEntry = apiWSDL.findWSDLForServiceName(wsdls, svcName);
     const swagger = apiWSDL.getSwaggerForService(wsdlEntry, svcName, wsdlId);
 
-    items.push(swagger);
+    return swagger;
   }
-  return convertToPostman(items);
+  return {};
 }
